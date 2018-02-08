@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 33027842729749260}
   - component: {fileID: 64515529197082922}
   - component: {fileID: 23596201086344308}
+  - component: {fileID: 114770819763390596}
   m_Layer: 0
   m_Name: Card
   m_TagString: Untagged
@@ -36,7 +37,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1669471794102228}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -7.56, y: 3.63, z: 1}
+  m_LocalPosition: {x: -7.5, y: 3, z: 1}
   m_LocalScale: {x: 0.11100869, y: 1.0000001, z: 0.16016813}
   m_Children: []
   m_Father: {fileID: 0}
@@ -97,3 +98,60 @@ MeshCollider:
   m_CookingOptions: 14
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &114770819763390596
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1669471794102228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ace25eec846bc9943b90d59740b1313a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cardNature: 0
+  player: {fileID: 0}
+  offsetCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  offsetTime: 0.2
+  offsetY: 3.5
+  originY: 0
+  scaleFactor: 1.1
+  isSelected: 0
+  hoverMat: {fileID: 2100000, guid: a1ce2ee9014b8554cacb52f8364e6a4b, type: 2}
+  moveCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  moveTime: 0.3
+  rend: {fileID: 23596201086344308}
