@@ -4,17 +4,6 @@ using UnityEngine;
 
 public class CardController : MonoBehaviour {
 
-    /*
-    [System.Serializable]
-    public struct PlayerCard
-    {
-        public Cards cardType;
-        public CardBehaviour behaviour;
-    }
-
-    public List<PlayerCard> playerCards = new List<PlayerCard>();
-    */
-
     public Dictionary<Cards, CardBehaviour> cardDico = new Dictionary<Cards, CardBehaviour>();
     public List<CardBehaviour> cardOrder = new List<CardBehaviour>();
 
@@ -23,30 +12,25 @@ public class CardController : MonoBehaviour {
     public string attack;
     public string shield;
     public string backstep;
-    bool canChangeCards = true;
-    //public float horCooldown;
+    public bool canChangeCards = true;
 
     x360_Gamepad gamepad;
 
     [Header("References")]
     public GameManager gameMan;
+    public AgentBehaviour agent;
     GamepadManager gamepadMan;
     CardBehaviour selectedCard;
-  //  CardBehaviour hoveredCard;
 
     void Start()
     {
-        //hoveredCard = cardDico[0];
-        //       hoveredCard.Hovered();
-/*
-        Dictionary<Cards, CardBehaviour>.ValueCollection valueColl = cardDico.Values;
-        foreach (CardBehaviour card in valueColl)
-        {
-            cardOrder.Add(card);
-        }
-*/
         gamepadMan = GamepadManager.Instance;
         gamepad = gamepadMan.GetGamepad(player);
+
+        for (int i = 0; i < cardOrder.Count; i++)
+        {
+            cardOrder[i].cardIndex = i;
+        }
     }
 
     void Update()
@@ -121,50 +105,6 @@ public class CardController : MonoBehaviour {
             }
         }
     }
-
-    /* void HoverOverCards()
-    {
-        if (gamepad.GetStick_L().X == -1)
-        {
-            hoveredCard.NotHovered();
-
-            int cardIndex = cardList.IndexOf(hoveredCard) - 1;
-
-            if (cardIndex < 0)
-            {
-                hoveredCard = cardList[cardList.Count - 1];
-            }
-
-            else
-                hoveredCard = cardList[cardIndex];
-
-            hoveredCard.Hovered();
-
-            canChangeCards = false;
-            StartCoroutine(HorizontalCooldown()); 
-        }
-
-        if (gamepad.GetStick_L().X == 1)
-        {
-            hoveredCard.NotHovered();
-
-            int cardIndex = cardList.IndexOf(hoveredCard) + 1;
-
-            if (cardIndex == cardList.Count)
-            {
-                hoveredCard = cardList[0];
-            }
-
-            else
-                hoveredCard = cardList[cardIndex];
-
-            hoveredCard.Hovered();
-
-            canChangeCards = false;
-            StartCoroutine(HorizontalCooldown());
-        }
-    }
-    */
 
     void MoveCard()
     {
@@ -255,6 +195,8 @@ public class CardController : MonoBehaviour {
                 //Update card order
                 cardOrder[cardIndex] = otherCard;
                 cardOrder[otherCardIndex] = selectedCard;
+                cardOrder[cardIndex].cardIndex = cardIndex;
+                cardOrder[otherCardIndex].cardIndex = cardIndex;
             }
 
             //Input cooldown
@@ -267,5 +209,11 @@ public class CardController : MonoBehaviour {
     {
         yield return new WaitForSeconds(_horCooldown);
         canChangeCards = true;
+    }
+
+    void OnDisable()
+    {
+        if (selectedCard != null && selectedCard.isSelected && !selectedCard.isMoving)
+            selectedCard.Deselect();
     }
 }
