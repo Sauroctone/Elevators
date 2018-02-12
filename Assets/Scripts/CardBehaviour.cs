@@ -36,11 +36,12 @@ public class CardBehaviour : MonoBehaviour {
     Vector3 originRot;
 
     [Header("References")]
-    public Renderer rend;
-    public Renderer faceRend;
-    public Material matAttack;
-    public Material matBackstep;
-    public Material matShield;
+    public GameObject cardAttack;
+    public GameObject cardBackstep;
+    public GameObject cardShield;
+    public Color[] bgColors;
+    public SpriteRenderer bgRend;
+
 
     void Start()
     {
@@ -48,7 +49,6 @@ public class CardBehaviour : MonoBehaviour {
         originY = transform.position.y;
         originScale = transform.localScale;
         originRot = transform.eulerAngles;
-        originMat = rend.material;
         newScale = new Vector3(originScale.x * scaleFactor, originScale.y, originScale.z * scaleFactor);
     }
 
@@ -75,11 +75,34 @@ public class CardBehaviour : MonoBehaviour {
     public void UpdateCard()
     {
         if (cardNature == Cards.Attack)
-            faceRend.material = matAttack;
-        if (cardNature == Cards.Backstep)
-            faceRend.material = matBackstep;
+        {
+            player.cardDico[Cards.Attack] = this;
+
+            cardAttack.SetActive(true);
+            cardBackstep.SetActive(false);
+            cardShield.SetActive(false);
+            bgRend.color = bgColors[0];
+        }
+
         if (cardNature == Cards.Shield)
-            faceRend.material = matShield;
+        {
+            player.cardDico[Cards.Shield] = this;
+
+            cardAttack.SetActive(false);
+            cardBackstep.SetActive(false);
+            cardShield.SetActive(true);
+            bgRend.color = bgColors[1];
+        }
+
+        if (cardNature == Cards.Backstep)
+        {
+            player.cardDico[Cards.Backstep] = this;
+
+            cardAttack.SetActive(false);
+            cardBackstep.SetActive(true);
+            cardShield.SetActive(false);
+            bgRend.color = bgColors[2];
+        }
     }
 
     IEnumerator SelectCor()
@@ -149,7 +172,7 @@ public class CardBehaviour : MonoBehaviour {
     {
         float time = 0;
         originRot = transform.eulerAngles;
-        Vector3 newRot = new Vector3(originRot.x, originRot.y, originRot.z + 180);
+        Vector3 newRot = new Vector3(originRot.x, originRot.y + 180, originRot.z);
         while (time < flipTime)
         {
             transform.eulerAngles = Vector3.Lerp(originRot, newRot, flipCurve.Evaluate(time/flipTime));

@@ -1,11 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
-    public List<string> playerOneInputs;
-    public List<string> playerTwoInputs;
     public List<Cards> cardTypes = new List<Cards>();
 
     public Rounds round;
@@ -13,28 +12,62 @@ public class GameManager : MonoBehaviour {
     Coroutine roundCorFight;
     Coroutine playerTurns;
 
+    [Header("Level movement")]
+    public Vector3 waitPos;
+    public Vector3 fightPos;
+    public Vector3 fightPosTimer;
+    public Vector3 buttonOutOfScreenPos;
+    public float levelMoveTime;
+    public AnimationCurve levelMoveCurve;
+    public AnimationCurve timerMoveCurve;
+
     [Header("Round : Wait")]
+    public Turns turn;
     public float flipDelay;
     public float peepTime;
     public float turnTime;
     public float roundTimeWait;
+    public float rotTimeArrow;
+    public AnimationCurve rotCurveArrow;
+    public Color[] playerColors;
 
     [Header("Round : Fight")]
+    public float agentTransTime;
+    Transform agent1;
+    Transform agent2;
+    Vector3 agentOriginPos1;
+    Vector3 agentOriginPos2;
+    public AnimationCurve agentTransCurve;
+    public float outOfScreenY;
+    public float fightPosY;
     public int health1;
     public int health2;   
 
     [Header("References")]
     public CardController player1;
     public CardController player2;
+    public Transform level;
+    public RectTransform timer;
+    public RectTransform buttons1;
+    public RectTransform buttons2;
+    public Image waitTimer;
+    public Image turnTimer;
     x360_Gamepad gamepad1;
     x360_Gamepad gamepad2;
     GamepadManager gamepadMan;
+    public GameObject arrow;
 
     void Start()
     {
         gamepadMan = GamepadManager.Instance;
         gamepad1 = gamepadMan.GetGamepad(1);
         gamepad2 = gamepadMan.GetGamepad(2);
+
+        agent1 = player1.agent.transform.parent;
+        agent2 = player2.agent.transform.parent;
+
+        agentOriginPos1 = agent1.localPosition;
+        agentOriginPos2 = agent2.localPosition;
     }
 
     void Update()
@@ -75,14 +108,16 @@ public class GameManager : MonoBehaviour {
         {
             player1.gameObject.SetActive(false);
             player2.gameObject.SetActive(true);
-            print("Player2");
+            StartCoroutine(ArrowCor(1));
+            turn = Turns.Player2;
         }
 
         else
         {
             player2.gameObject.SetActive(false);
             player1.gameObject.SetActive(true);
-            print("Player1");
+            StartCoroutine(ArrowCor(-1));
+            turn = Turns.Player1;
         }
 
         playerTurns = StartCoroutine(PlayerTurns());
@@ -90,9 +125,14 @@ public class GameManager : MonoBehaviour {
 
     IEnumerator WaitCor ()
     {
+        StartCoroutine(FightToWaitCor());
+
+        waitTimer.fillAmount = 1;
+        turnTimer.fillAmount = 1;
+
         player1.Randomize();
         player2.Randomize();
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(2);
 
         //Show cards
 
@@ -127,18 +167,55 @@ public class GameManager : MonoBehaviour {
         //Start turns
 
         playerTurns = StartCoroutine(PlayerTurns());
-        player1.gameObject.SetActive(true);
-        print("Player1");
+
+        if (turn == Turns.Player1)
+            player1.gameObject.SetActive(true);
+        if (turn == Turns.Player2)
+            player2.gameObject.SetActive(true);
+
+        StartCoroutine(WaitTimer());
         yield return new WaitForSeconds(roundTimeWait);
         
         //End turns
 
         StopCoroutine(playerTurns);
-        print("End of round");
         player1.gameObject.SetActive(false);
         player2.gameObject.SetActive(false);
 
-        yield return new WaitForSeconds(1);
+        //Level transition
+        StartCoroutine(WaitToFightCor());
+        yield return new WaitForSeconds(levelMoveTime);
+
+        //Agents transition
+
+        float time = 0f;
+        while (time < agentTransTime)
+        {
+            agent1.localPosition = Vector3.Lerp(agentOriginPos1, new Vector3(agentOriginPos1.x, outOfScreenY, agentOriginPos1.z), agentTransCurve.Evaluate(time / agentTransTime));
+            agent2.localPosition = Vector3.Lerp(agentOriginPos2, new Vector3(agentOriginPos2.x, outOfScreenY, agentOriginPos2.z), agentTransCurve.Evaluate(time / agentTransTime));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        agent1.localPosition = new Vector3(agentOriginPos1.x, outOfScreenY, agentOriginPos1.z);
+        agent2.localPosition = new Vector3(agentOriginPos2.x, outOfScreenY, agentOriginPos2.z);
+
+        player1.agent.anim.SetTrigger("FightMode");
+        player2.agent.anim.SetTrigger("FightMode");
+        yield return new WaitForSeconds(.5f);
+
+        time = 0f;
+        while (time < agentTransTime)
+        {
+            agent1.localPosition = Vector3.Lerp(new Vector3(agentOriginPos1.x, outOfScreenY, agentOriginPos1.z), new Vector3(agentOriginPos1.x, fightPosY, agentOriginPos1.z), agentTransCurve.Evaluate(time / agentTransTime));
+            agent2.localPosition = Vector3.Lerp(new Vector3(agentOriginPos2.x, outOfScreenY, agentOriginPos2.z), new Vector3(agentOriginPos2.x, fightPosY, agentOriginPos2.z), agentTransCurve.Evaluate(time / agentTransTime));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        agent1.localPosition = new Vector3(agentOriginPos1.x, fightPosY, agentOriginPos1.z);
+        agent2.localPosition = new Vector3(agentOriginPos2.x, fightPosY, agentOriginPos2.z);
+
+        //Fight
+
         round = Rounds.Fight;
         roundCorFight = StartCoroutine(FightCor());
     }
@@ -309,6 +386,36 @@ public class GameManager : MonoBehaviour {
             card.Flip();
             yield return new WaitForSeconds(flipDelay);
         }
+   
+        //Agents transition
+
+        float time = 0f;
+        while (time < agentTransTime)
+        {
+            agent1.localPosition = Vector3.Lerp(new Vector3(agentOriginPos1.x, fightPosY, agentOriginPos1.z), new Vector3(agentOriginPos1.x, outOfScreenY, agentOriginPos1.z), agentTransCurve.Evaluate(time / agentTransTime));
+            agent2.localPosition = Vector3.Lerp(new Vector3(agentOriginPos2.x, fightPosY, agentOriginPos2.z), new Vector3(agentOriginPos2.x, outOfScreenY, agentOriginPos2.z), agentTransCurve.Evaluate(time / agentTransTime));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        agent1.localPosition = new Vector3(agentOriginPos1.x, outOfScreenY, agentOriginPos1.z);
+        agent2.localPosition = new Vector3(agentOriginPos2.x, outOfScreenY, agentOriginPos2.z);
+
+        player1.agent.anim.SetTrigger("WaitMode");
+        player2.agent.anim.SetTrigger("WaitMode");
+        yield return new WaitForSeconds(.5f);
+
+        time = 0f;
+        while (time < agentTransTime)
+        {
+            agent1.localPosition = Vector3.Lerp(new Vector3(agentOriginPos1.x, outOfScreenY, agentOriginPos1.z), agentOriginPos1, agentTransCurve.Evaluate(time / agentTransTime));
+            agent2.localPosition = Vector3.Lerp(new Vector3(agentOriginPos2.x, outOfScreenY, agentOriginPos2.z), agentOriginPos2, agentTransCurve.Evaluate(time / agentTransTime));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        agent1.localPosition = agentOriginPos1;
+        agent2.localPosition = agentOriginPos2;
+
+        //Wait
 
         round = Rounds.Wait;
         roundCorWait = StartCoroutine(WaitCor());
@@ -316,12 +423,85 @@ public class GameManager : MonoBehaviour {
 
     IEnumerator PlayerTurns ()
     {
-        yield return new WaitForSeconds(turnTime);
+        if (turn == Turns.Player1)
+            turnTimer.color = playerColors[0];
+        else
+            turnTimer.color = playerColors[1];
+
+        float time = 0;
+        while (time < turnTime)
+        {
+            turnTimer.fillAmount = 1- time / turnTime;
+            time += Time.deltaTime;
+            yield return null;
+        }
+        
         EndTurn();
+    }
+
+    IEnumerator WaitTimer()
+    {
+        float time = 0;
+        while (time < roundTimeWait)
+        {
+            waitTimer.fillAmount = 1 - time / roundTimeWait;
+            time += Time.deltaTime;
+            yield return null;
+        }
     }
 
     IEnumerator EndGame (CardController _winner)
     {
         yield return null;
+    }
+
+    IEnumerator ArrowCor(int _factor)
+    {
+        float time = 0;
+        Vector3 originRot = arrow.transform.eulerAngles;
+        Vector3 newRot = new Vector3(originRot.x, originRot.y, originRot.z - 180 * _factor);
+        while (time < rotTimeArrow)
+        {
+            arrow.transform.eulerAngles = Vector3.Lerp(originRot, newRot, rotCurveArrow.Evaluate(time / rotTimeArrow));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        arrow.transform.eulerAngles = newRot;
+    }
+
+    IEnumerator WaitToFightCor()
+    {
+        float time = 0f;
+        while (time < levelMoveTime)
+        {
+            level.position = Vector3.Lerp(waitPos, fightPos, levelMoveCurve.Evaluate(time / levelMoveTime));
+            timer.anchoredPosition = Vector3.Lerp(waitPos, fightPosTimer, timerMoveCurve.Evaluate(time / levelMoveTime));
+            buttons1.anchoredPosition = Vector3.Lerp(waitPos, -buttonOutOfScreenPos, levelMoveCurve.Evaluate(time / levelMoveTime));
+            buttons2.anchoredPosition = Vector3.Lerp(waitPos, buttonOutOfScreenPos, levelMoveCurve.Evaluate(time / levelMoveTime));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        level.position = fightPos;
+        timer.anchoredPosition = fightPosTimer;
+        buttons1.anchoredPosition = -buttonOutOfScreenPos;
+        buttons2.anchoredPosition = buttonOutOfScreenPos;
+    }
+
+    IEnumerator FightToWaitCor()
+    {
+        float time = 0f;
+        while (time < levelMoveTime)
+        {
+            level.position = Vector3.Lerp(fightPos, waitPos, levelMoveCurve.Evaluate(time / levelMoveTime));
+            timer.anchoredPosition = Vector3.Lerp(fightPosTimer, waitPos, timerMoveCurve.Evaluate(time / levelMoveTime));
+            buttons1.anchoredPosition = Vector3.Lerp(-buttonOutOfScreenPos, waitPos, levelMoveCurve.Evaluate(time / levelMoveTime));
+            buttons2.anchoredPosition = Vector3.Lerp(buttonOutOfScreenPos, waitPos, levelMoveCurve.Evaluate(time / levelMoveTime));
+            time += Time.deltaTime;
+            yield return null;
+        }
+        level.position = waitPos;
+        timer.anchoredPosition = waitPos;
+        buttons1.anchoredPosition = waitPos;
+        buttons2.anchoredPosition = waitPos;
     }
 }
