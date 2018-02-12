@@ -148,12 +148,12 @@ public class CardController : MonoBehaviour {
             }
 
             //Swap card positions
-            selectedCard.Move(new Vector3 (otherCard.transform.position.x, selectedCard.offsetY, otherCard.transform.position.z));
+            selectedCard.Move(new Vector3 (otherCard.transform.localPosition.x, selectedCard.offsetY, otherCard.transform.localPosition.z));
 
             if (middleCard != null)
             {
-                otherCard.Move(new Vector3(middleCard.transform.position.x, middleCard.originY, middleCard.transform.position.z));
-                middleCard.Move(new Vector3(selectedCard.transform.position.x, selectedCard.originY, selectedCard.transform.position.z));
+                otherCard.Move(new Vector3(middleCard.transform.localPosition.x, middleCard.originY, middleCard.transform.localPosition.z));
+                middleCard.Move(new Vector3(selectedCard.transform.localPosition.x, selectedCard.originY, selectedCard.transform.localPosition.z));
 
                 //Update card order
                 cardOrder[1] = otherCard;
@@ -163,7 +163,7 @@ public class CardController : MonoBehaviour {
 
             else
             {
-                otherCard.Move(new Vector3(selectedCard.transform.position.x, selectedCard.originY, selectedCard.transform.position.z));
+                otherCard.Move(new Vector3(selectedCard.transform.localPosition.x, selectedCard.originY, selectedCard.transform.localPosition.z));
 
                 //Update card order
                 cardOrder[cardIndex] = otherCard;
@@ -197,12 +197,12 @@ public class CardController : MonoBehaviour {
             }
 
             //Swap card positions
-            selectedCard.Move(new Vector3(otherCard.transform.position.x, selectedCard.offsetY, otherCard.transform.position.z));
+            selectedCard.Move(new Vector3(otherCard.transform.localPosition.x, selectedCard.offsetY, otherCard.transform.localPosition.z));
 
             if (middleCard != null)
             {
-                otherCard.Move(new Vector3(middleCard.transform.position.x, middleCard.originY, middleCard.transform.position.z));
-                middleCard.Move(new Vector3(selectedCard.transform.position.x, selectedCard.originY, selectedCard.transform.position.z));
+                otherCard.Move(new Vector3(middleCard.transform.localPosition.x, middleCard.originY, middleCard.transform.localPosition.z));
+                middleCard.Move(new Vector3(selectedCard.transform.localPosition.x, selectedCard.originY, selectedCard.transform.localPosition.z));
 
                 //Update card order
                 cardOrder[1] = otherCard;
@@ -212,7 +212,7 @@ public class CardController : MonoBehaviour {
 
             else
             {
-                otherCard.Move(new Vector3(selectedCard.transform.position.x, selectedCard.originY, selectedCard.transform.position.z));
+                otherCard.Move(new Vector3(selectedCard.transform.localPosition.x, selectedCard.originY, selectedCard.transform.localPosition.z));
 
                 //Update card order
                 cardOrder[cardIndex] = otherCard;

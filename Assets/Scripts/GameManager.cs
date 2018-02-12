@@ -30,6 +30,9 @@ public class GameManager : MonoBehaviour {
     public float rotTimeArrow;
     public AnimationCurve rotCurveArrow;
     public Color[] playerColors;
+    bool isGoingUp;
+    public float elevatorSpeed;
+
 
     [Header("Round : Fight")]
     public float agentTransTime;
@@ -52,6 +55,7 @@ public class GameManager : MonoBehaviour {
     public RectTransform buttons2;
     public Image waitTimer;
     public Image turnTimer;
+    public Transform elevatorFX;
     x360_Gamepad gamepad1;
     x360_Gamepad gamepad2;
     GamepadManager gamepadMan;
@@ -93,6 +97,24 @@ public class GameManager : MonoBehaviour {
             {
                 round = Rounds.End;
                 StartCoroutine(EndGame(player1));
+            }
+        }
+
+        ElevatorFeedback();
+    }
+
+    void ElevatorFeedback()
+    {
+        float viewPortY = Camera.main.WorldToViewportPoint(elevatorFX.position).y;
+        print(viewPortY);
+
+        if (isGoingUp || viewPortY <= 1.5 && viewPortY >= -0.5)
+        {
+            elevatorFX.position += -Vector3.up * elevatorSpeed * Time.deltaTime;
+
+            if (viewPortY < -1)
+            {
+                elevatorFX.position = Camera.main.ViewportToWorldPoint(new Vector3 (0.5f, 2, 1.5f));
             }
         }
     }
@@ -183,6 +205,7 @@ public class GameManager : MonoBehaviour {
         player2.gameObject.SetActive(false);
 
         //Level transition
+        isGoingUp = false;
         StartCoroutine(WaitToFightCor());
         yield return new WaitForSeconds(levelMoveTime);
 
@@ -503,5 +526,7 @@ public class GameManager : MonoBehaviour {
         timer.anchoredPosition = waitPos;
         buttons1.anchoredPosition = waitPos;
         buttons2.anchoredPosition = waitPos;
+
+        isGoingUp = true;
     }
 }

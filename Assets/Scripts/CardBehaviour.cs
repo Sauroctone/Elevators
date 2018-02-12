@@ -46,7 +46,7 @@ public class CardBehaviour : MonoBehaviour {
     void Start()
     {
         player.cardDico.Add(cardNature, this);
-        originY = transform.position.y;
+        originY = transform.localPosition.y;
         originScale = transform.localScale;
         originRot = transform.eulerAngles;
         newScale = new Vector3(originScale.x * scaleFactor, originScale.y, originScale.z * scaleFactor);
@@ -108,19 +108,19 @@ public class CardBehaviour : MonoBehaviour {
     IEnumerator SelectCor()
     {
         isSelected = true;
-        originPos = transform.position; 
+        originPos = transform.localPosition; 
 
-        Vector3 pos = transform.position;
+        Vector3 pos = transform.localPosition;
         float time = 0f;
-        while(time < offsetTime)
+        while (time < offsetTime)
         {
-            transform.position = Vector3.Lerp(pos, new Vector3(pos.x, offsetY, pos.z), offsetCurve.Evaluate(time/offsetTime));
+            transform.localPosition = Vector3.Lerp(pos, new Vector3(pos.x, offsetY, pos.z), offsetCurve.Evaluate(time/offsetTime));
             transform.localScale = Vector3.Lerp(originScale, newScale, offsetCurve.Evaluate(time / offsetTime));
 
             time += Time.deltaTime;
             yield return null;
         }
-        transform.position = new Vector3(pos.x, offsetY, pos.z);
+        transform.localPosition = new Vector3(pos.x, offsetY, pos.z);
         transform.localScale = newScale;
     }
 
@@ -128,19 +128,19 @@ public class CardBehaviour : MonoBehaviour {
     {
         isSelected = false;
 
-        Vector3 pos = transform.position;
+        Vector3 pos = transform.localPosition;
         float time = 0f;
         while (time < offsetTime)
         {
-            transform.position = Vector3.Lerp(pos, new Vector3(pos.x, originY, pos.z), offsetCurve.Evaluate(time / offsetTime));
+            transform.localPosition = Vector3.Lerp(pos, new Vector3(pos.x, originY, pos.z), offsetCurve.Evaluate(time / offsetTime));
             transform.localScale = Vector3.Lerp(newScale, originScale, offsetCurve.Evaluate(time / offsetTime));
             time += Time.deltaTime;
             yield return null;
         }
-        transform.position = new Vector3(pos.x, originY, pos.z);
+        transform.localPosition = new Vector3(pos.x, originY, pos.z);
         transform.localScale = originScale;
 
-        if (transform.position != originPos && player.gameObject.activeSelf)
+        if (transform.localPosition != originPos && player.gameObject.activeSelf)
         {
             player.gameMan.EndTurn();
         }
@@ -149,16 +149,16 @@ public class CardBehaviour : MonoBehaviour {
     IEnumerator MoveCor(Vector3 _newPos)
     {
         isMoving = true;
-        Vector3 firstPos = transform.position;
+        Vector3 firstPos = transform.localPosition;
 
         float time = 0f;
         while (time < moveTime)
         {
-            transform.position = Vector3.Lerp(firstPos, _newPos, moveCurve.Evaluate(time / moveTime));
+            transform.localPosition = Vector3.Lerp(firstPos, _newPos, moveCurve.Evaluate(time / moveTime));
             time += Time.deltaTime;
             yield return null;
         }
-        transform.position = _newPos;
+        transform.localPosition = _newPos;
 
         if (!player.gameObject.activeSelf && isSelected)
         {
