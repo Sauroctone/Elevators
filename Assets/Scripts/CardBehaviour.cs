@@ -37,6 +37,10 @@ public class CardBehaviour : MonoBehaviour {
 
     [Header("References")]
     public Renderer rend;
+    public Renderer faceRend;
+    public Material matAttack;
+    public Material matBackstep;
+    public Material matShield;
 
     void Start()
     {
@@ -47,18 +51,6 @@ public class CardBehaviour : MonoBehaviour {
         originMat = rend.material;
         newScale = new Vector3(originScale.x * scaleFactor, originScale.y, originScale.z * scaleFactor);
     }
-
-/*
-    public void Hovered()
-    {
-        rend.material = hoverMat;
-    }
-
-    public void NotHovered()
-    {
-        rend.material = originMat;
-    }
-*/
 
 	public void Select()
     {
@@ -80,9 +72,14 @@ public class CardBehaviour : MonoBehaviour {
         StartCoroutine(FlipCor());
     }
 
-    public void Resolve()
+    public void UpdateCard()
     {
-        StartCoroutine(ResolveCor());
+        if (cardNature == Cards.Attack)
+            faceRend.material = matAttack;
+        if (cardNature == Cards.Backstep)
+            faceRend.material = matBackstep;
+        if (cardNature == Cards.Shield)
+            faceRend.material = matShield;
     }
 
     IEnumerator SelectCor()
@@ -146,27 +143,6 @@ public class CardBehaviour : MonoBehaviour {
         }
 
         isMoving = false;
-    }
-
-    IEnumerator ResolveCor()
-    {
-        if (cardNature == Cards.Attack)
-        {
-            if (cardIndex != 0 && player.cardOrder[cardIndex - 1].cardNature == Cards.Backstep)
-            {
-                player.agent.Attack(Cards.Backstep);
-            }
-
-            else if (cardIndex != 0 && player.cardOrder[cardIndex - 1].cardNature == Cards.Shield)
-            {
-                player.agent.Attack(Cards.Shield);
-            }
-
-            else
-                player.agent.Attack(Cards.Attack);
-        }
-
-        yield return new WaitForSeconds(2);
     }
 
     IEnumerator FlipCor()

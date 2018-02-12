@@ -198,6 +198,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardNature: 0
   player: {fileID: 0}
+  cardIndex: 0
   offsetCurve:
     serializedVersion: 2
     m_Curve:
@@ -241,6 +242,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 0
   moveTime: 0.3
+  isMoving: 0
   flipCurve:
     serializedVersion: 2
     m_Curve:
@@ -261,3 +263,7 @@ MonoBehaviour:
     m_RotationOrder: 0
   flipTime: 0.3
   rend: {fileID: 23596201086344308}
+  faceRend: {fileID: 23482026867831114}
+  matAttack: {fileID: 2100000, guid: a1ce2ee9014b8554cacb52f8364e6a4b, type: 2}
+  matBackstep: {fileID: 2100000, guid: 275a394cc6d30984786a713039545a2a, type: 2}
+  matShield: {fileID: 2100000, guid: 7c8d4a8e137461b41ae47a7465663094, type: 2}

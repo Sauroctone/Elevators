@@ -46,6 +46,26 @@ public class CardController : MonoBehaviour {
         }
     }
 
+    public void Randomize()
+    {
+        List<Cards> _newList = new List<Cards>();
+
+        for (int i = 0; i < gameMan.cardTypes.Count;)
+        {
+            int _index = Random.Range(0, gameMan.cardTypes.Count);
+            _newList.Add(gameMan.cardTypes[_index]);
+            gameMan.cardTypes.RemoveAt(_index);
+        }
+
+        gameMan.cardTypes = _newList;   
+
+        for (int i = 0; i < cardOrder.Count; i++)
+        {
+            cardOrder[i].cardNature = gameMan.cardTypes[i];
+            cardOrder[i].UpdateCard();  
+        }
+    }
+
     void SelectCard()
     {
         if (gamepad.GetButtonDown(attack))
@@ -148,6 +168,8 @@ public class CardController : MonoBehaviour {
                 //Update card order
                 cardOrder[cardIndex] = otherCard;
                 cardOrder[otherCardIndex] = selectedCard;
+                cardOrder[cardIndex].cardIndex = cardIndex;
+                cardOrder[otherCardIndex].cardIndex = otherCardIndex;
             }
 
             //Input cooldown
@@ -196,7 +218,7 @@ public class CardController : MonoBehaviour {
                 cardOrder[cardIndex] = otherCard;
                 cardOrder[otherCardIndex] = selectedCard;
                 cardOrder[cardIndex].cardIndex = cardIndex;
-                cardOrder[otherCardIndex].cardIndex = cardIndex;
+                cardOrder[otherCardIndex].cardIndex = otherCardIndex;
             }
 
             //Input cooldown
